@@ -1,0 +1,122 @@
+*{
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+    
+}
+body{
+    margin: 0%;
+    padding: 0%;
+    background-image: url("https://img.freepik.com/free-vector/leaves-background-with-metallic-foil_79603-956.jpg?semt=ais_hybrid&w=740&q=80");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+.myNav{
+ background-color: rgba(96, 141, 118, 0.904);   
+ color: aliceblue;
+}
+.MyBtn{
+    background-color:rgba(74, 121, 107, 0.842);
+    color: aliceblue;
+    font-weight: bold;
+    border: none;
+}
+.boxShadow:focus{
+box-shadow: none;
+border: 2px groove rgba(74, 121, 107, 0.842);
+}
+.MyBtn:hover{
+    background-color:rgba(74, 121, 107, 0.842);
+    color: aliceblue;
+    font-weight: bold;
+    transform: scale(1.15);
+    transition: 1s;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
+}
+.card{
+    margin-left: 15px;
+    margin-top: 15px;
+    border-radius: 15px;
+    border: 2px groove gray;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    max-width: 600px;
+}
+.circle{
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgE4FPoOW8nltH4eN6RwIcK--ckBBS-lDkyw&s");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.postCard{
+    height: 270px;
+    width: 700px;
+    object-fit: cover;
+}
+.selectedImg{
+    border-radius: 30%;
+    cursor: pointer;
+      border: 2px solid black;
+          background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    color: white;
+
+}
+.imgBorder:hover{
+    border: 2px solid black;
+    transform: scale(1.5px);
+    transition: 1s;
+}
+.postCard{
+    
+          background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    color: white;
+}
+.formContainer{
+max-width: 500px;
+}
+/* .postInput{
+    width: 500px;
+} */
+ .removeBorderOnFocus:focus{
+    border: 2px groove rgb(80, 112, 73);
+        box-shadow: rgba(83, 122, 98, 0.24) 0px 3px 8px;
+outline: none;
+ }
+.postInput{
+    height: fit-content;
+    width: 500px;
+    background-image: url("https://img.freepik.com/free-photo/sunset-background-pastel-sky_53876-129041.jpg?semt=ais_hybrid&w=740&q=80");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    margin: 0 auto;
+    max-width: 500px;
+ }
+.postBtn{
+    float: right;
+    background-color: darkolivegreen;
+ }
+   @media (max-width: 900px) {
+.postCard{
+max-width: 350px ;
+max-height: 870px;
+}
+.postInput{
+    height: fit-content;
+    width: 300px;
+    background-image: url("https://img.freepik.com/free-photo/sunset-background-pastel-sky_53876-129041.jpg?semt=ais_hybrid&w=740&q=80");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    margin: 0 auto;
+    max-width: 500px;
+ }
+  }
