@@ -5,6 +5,10 @@ var editID;
 
 var postTime = new Date()
 var timeOnly = postTime.toLocaleTimeString()
+async function logout() {
+  
+}
+
 
 async function searchPosts() {
 
@@ -46,42 +50,47 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Fallback: use email prefix if no username metadata
     userNameInput.value = session.user.email.split("@")[0];
   }
-
+})
   // Load posts from database
-  try {
-    const { data, error } = await supabase
-      .from('postApp')
-      .select('*')
-      .order('id', { ascending: false });
-
-    console.log(data);
-    var posts = document.getElementById("posts");
-    data.forEach(post => {
-      posts.innerHTML += `   <div   class="col-lg-8 col-md-12 col-sm-12">
-        <div style="background: url('${post.img_url}');" class="card text-bg-light postCard">
-        
-          <div class="card-img-overlay">
-                      <h3 class="card-title text-white my-4">${post.username}</h3>
-            <h5 class="card-title text-white">${post.title}</h5>
-            <p class="card-text text-white">${post.description}</p>
-            <p class="card-text text-white"><small>${post.created_at}</small></p>
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-              <button onclick = " editPost(event,${post.id})" class="btn btn-success me-md-2" type="button">Edit</button>
-              <button  onclick = "deletePost(event,${post.id})" class="btn btn-danger" type="button">Delete</button>
+  async function loadPost() {
+    try {
+      const { data, error } = await supabase
+        .from('postApp')
+        .select('*')
+        .order('id', { ascending: false });
+  
+      console.log(data);
+      var posts = document.getElementById("posts");
+      posts.innerHTML = ""
+      data.forEach(post => {
+        posts.innerHTML += `   <div   class="col-lg-8 col-md-12 col-sm-12">
+          <div style="background: url('${post.img_url}');" class="card text-bg-light postCard">
+          
+            <div class="card-img-overlay">
+                        <h3 class="card-title text-white my-4">${post.username}</h3>
+              <h5 class="card-title text-white">${post.title}</h5>
+              <p class="card-text text-white">${post.description}</p>
+              <p class="card-text text-white"><small>${post.created_at}</small></p>
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button onclick = " editPost(event,${post.id})" class="btn btn-success me-md-2" type="button">Edit</button>
+                <button  onclick = "deletePost(event,${post.id})" class="btn btn-danger" type="button">Delete</button>
+              </div>
             </div>
           </div>
-        </div>
-      </div>`;
-      document.getElementById("title").value = "";
-      document.getElementById("description").value = "";
+        </div>`;
+        document.getElementById("title").value = "";
+        document.getElementById("description").value = "";
+  
+      })
+      if (error) console.log(error);
+    }
+    catch (error) {
+      console.log(error);
+    }
+  }
 
-    })
-    if (error) console.log(error);
-  }
-  catch (error) {
-    console.log(error);
-  }
-})
+
+window.addEventListener('DOMContentLoaded',loadPost())
 async function deletePost(event, id) {
   try {
 
@@ -232,3 +241,19 @@ window.post = post;
 window.clickAbleImg = clickAbleImg;
 window.deletePost = deletePost;
 window.editPost = editPost;
+window.loadPost = loadPost
+const channel = supabase
+  .channel('post-channel')
+  .on(
+    'postgres_changes',
+    {
+      event: '*',
+      schema: 'public',
+      table: 'postApp'
+    },
+    (payload) => {
+      console.log(payload)
+      loadPost()
+    }
+  )
+  .subscribe()
