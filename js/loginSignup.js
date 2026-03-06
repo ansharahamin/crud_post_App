@@ -76,6 +76,20 @@ login_btn.addEventListener('click', async (e) => {
     }
 });
 
+var signInWithGoogle = document.getElementById("signInWithGoogle")
+signInWithGoogle.addEventListener('click', async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: 'http://127.0.0.1:5500/dashboard.html'
+        }
+    })
+
+  if (error) {
+    console.log("Google login error:", error.message);
+  }
+})
+
 // ─── Auth State Listener ──────────────────────────────────────────────────────
 // Only auto-redirects on INITIAL_SESSION if user is already logged in.
 // SIGNED_IN redirect removed to avoid race conditions with the login button handler.

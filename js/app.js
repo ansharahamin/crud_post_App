@@ -5,8 +5,14 @@ var editID;
 
 var postTime = new Date()
 var timeOnly = postTime.toLocaleTimeString()
+// const logout = document.getElementById("btn-logout")
 async function logout() {
-  
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.log("Logout error:", error.message);
+  } else {
+    window.location.href = "index.html";
+  }
 }
 
 
@@ -241,7 +247,8 @@ window.post = post;
 window.clickAbleImg = clickAbleImg;
 window.deletePost = deletePost;
 window.editPost = editPost;
-window.loadPost = loadPost
+window.loadPost = loadPost;
+window.logout = logout;
 const channel = supabase
   .channel('post-channel')
   .on(
