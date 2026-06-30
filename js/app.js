@@ -8,18 +8,44 @@ var timeOnly = postTime.toLocaleTimeString()
 
 async function searchPosts() {
 
-  let searchValue = document.getElementById("searchValue").value;
+  let searchValue = document.getElementById("searchValue").value.trim();
   
    var posts = document.getElementById("posts");
    posts.innerHTML = "";
    try {
-    
-   } catch (error) {
+    const { data, error } = await supabase
+  .from('Post App Table') 
+  .select('*')
+  // .ilike('title', `%${searchValue}%`)
+    .or(`title.ilike.%${searchValue}%, description.ilike.%${searchValue}%, userName.ilike.%${searchValue}%`)
+  if (error)   console.log(error);
+  console.log(data);
+var posts = document.getElementById("posts");
+posts.innerHTML = "";
+   data.forEach(post => {
+      posts.innerHTML += `   <div   class="col-lg-8 col-md-12 col-sm-12">
+        <div style="background: url('${post.img_bg}');" class="card text-bg-light postCard">
+        
+          <div class="card-img-overlay">
+                      <h3 class="card-title text-white my-4">${post.userName}</h3>
+            <h5 class="card-title text-white">${post.title}</h5>
+            <p class="card-text text-white">${post.description}</p>
+            <p class="card-text text-white"><small>${post.created_at}</small></p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button onclick = " editPost(event,${post.id})" class="btn btn-success me-md-2" type="button">Edit</button>
+              <button  onclick = "deletePost(event,${post.id})" class="btn btn-danger" type="button">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+   })
+  }
+   catch (error) {
+    console.log(error);
     
    }
-}
 
-
+  }
 
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -50,18 +76,18 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Load posts from database
   try {
     const { data, error } = await supabase
-      .from('postApp')
+      .from('Post App Table')
       .select('*')
       .order('id', { ascending: false });
 
     console.log(data);
-    var posts = document.getElementById("posts");
+ var posts = document.getElementById("posts");   
     data.forEach(post => {
       posts.innerHTML += `   <div   class="col-lg-8 col-md-12 col-sm-12">
-        <div style="background: url('${post.img_url}');" class="card text-bg-light postCard">
+        <div style="background: url('${post.img_bg}');" class="card text-bg-light postCard">
         
           <div class="card-img-overlay">
-                      <h3 class="card-title text-white my-4">${post.username}</h3>
+                      <h3 class="card-title text-white my-4">${post.userName}</h3>
             <h5 class="card-title text-white">${post.title}</h5>
             <p class="card-text text-white">${post.description}</p>
             <p class="card-text text-white"><small>${post.created_at}</small></p>
@@ -111,7 +137,7 @@ async function deletePost(event, id) {
 
     // Database delete
     const { error } = await supabase
-      .from("postApp")
+      .from("Post App Table")
       .delete()
       .eq("id", id);
 
@@ -168,8 +194,8 @@ async function post() {
 
     if (editID) {
       const { data, error } = await supabase
-        .from("postApp")
-        .update({ username: userName, title, description, img_url: cardImg })
+        .from("Post App Table")
+        .update({ userName: userName, title, description, img_bg: cardImg })
         .eq('id', editID)
         .select("*");
       if (error) throw error;
@@ -177,8 +203,8 @@ async function post() {
       editID = null;
     } else {
       const { data, error } = await supabase
-        .from("postApp")
-        .insert([{ username: userName, title, description, img_url: cardImg }])
+        .from("Post App Table")
+        .insert([{ userName: userName, title, description, img_bg: cardImg }])
         .select("*");
       if (error) throw error;
       console.log(data[0]);
@@ -188,21 +214,21 @@ async function post() {
     // Only render card after DB operation succeeds and inserted is defined
     document.getElementById("title").value = "";
     document.getElementById("description").value = "";
-
-    posts.innerHTML += `<div class="col-lg-8 col-md-12 col-sm-12">
-        <div style="background: url('${inserted.img_url}');" class="card text-bg-light postCard">
-          <div class="card-img-overlay">
-            <h3 class="card-title text-white my-4">${inserted.username}</h3>
-            <h5 class="card-title text-white">${inserted.title}</h5>
-            <p class="card-text text-white">${inserted.description}</p>
-            <p class="card-text text-white"><small>${inserted.created_at}</small></p>
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-              <button onclick="editPost(event, ${inserted.id})" class="btn btn-success me-md-2" type="button">Edit</button>
-              <button onclick="deletePost(event, ${inserted.id})" class="btn btn-danger" type="button">Delete</button>
-            </div>
-          </div>
-        </div>
-      </div>`;
+    location.reload();
+    // posts.innerHTML += `<div class="col-lg-8 col-md-12 col-sm-12">
+    //     <div style="background: url('${inserted.img_bg}');" class="card text-bg-light postCard">
+    //       <div class="card-img-overlay">
+    //         <h3 class="card-title text-white my-4">${inserted.userName}</h3>
+    //         <h5 class="card-title text-white">${inserted.title}</h5>
+    //         <p class="card-text text-white">${inserted.description}</p>
+    //         <p class="card-text text-white"><small>${inserted.created_at}</small></p>
+    //         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+    //           <button onclick="editPost(event, ${inserted.id})" class="btn btn-success me-md-2" type="button">Edit</button>
+    //           <button onclick="deletePost(event, ${inserted.id})" class="btn btn-danger" type="button">Delete</button>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </div>`;
 
   } catch (error) {
     console.log(error);
@@ -232,3 +258,4 @@ window.post = post;
 window.clickAbleImg = clickAbleImg;
 window.deletePost = deletePost;
 window.editPost = editPost;
+window.searchPosts = searchPosts;

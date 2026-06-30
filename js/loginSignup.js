@@ -25,6 +25,7 @@ const login_btn = document.getElementById("login-btn");    // form submit button
 const register_btn = document.getElementById("register-btn"); // form submit button
 
 // ─── Register Form Submit Button (#register-btn) ──────────────────────────────
+
 register_btn.addEventListener('click', async (e) => {
     e.preventDefault(); // prevents form submission / page reload
 
@@ -36,21 +37,23 @@ register_btn.addEventListener('click', async (e) => {
         alert("Please fill in all fields.");
         return;
     }
-
-    const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-            data: { userName }
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password
+        })
+        if (error) {
+            console.log(error);
+            alert("Error signing up. Please try again.");
         }
-    });
+        console.log(data);
+        window.location.href = "dashboard.html"; // Redirect to dashboard page after successful signup
 
-    if (error) {
-        alert(error.message);
-    } else {
-        window.location.href = "dashboard.html";
+    } catch (error) {
+        console.error("Error signing up:", error);
     }
-});
+
+})
 
 // ─── Login Form Submit Button (#login-btn) ────────────────────────────────────
 login_btn.addEventListener('click', async (e) => {
@@ -58,21 +61,21 @@ login_btn.addEventListener('click', async (e) => {
 
     const email = l_emailInput.value.trim();
     const password = l_passwordInput.value;
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+            if(error) {
+                console.log(error.message)
+            }
+        })
+        console.log(data)
+        window.location.href = "dashboard.html"; // Redirect to dashboard page after successful signup
 
-    if (!email || !password) {
-        alert("Please enter your email and password.");
-        return;
     }
+    catch (error) {
+        console.log(error.message);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-    });
-
-    if (error) {
-        alert(error.message);
-    } else {
-        window.location.href = "dashboard.html";
     }
 });
 
@@ -84,7 +87,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 
     if (event === 'INITIAL_SESSION' && session) {
         // Already logged in — send to dashboard immediately
-        window.location.href = "dashboard.html";
+        // window.location.href = "dashboard.html";
     }
 
     if (event === 'SIGNED_OUT') {
