@@ -5,6 +5,16 @@ var editID;
 
 var postTime = new Date()
 var timeOnly = postTime.toLocaleTimeString()
+// const logout = document.getElementById("btn-logout")
+async function logout() {
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.log("Logout error:", error.message);
+  } else {
+    window.location.href = "index.html";
+  }
+}
+
 
 async function searchPosts() {
 
@@ -72,7 +82,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Fallback: use email prefix if no username metadata
     userNameInput.value = session.user.email.split("@")[0];
   }
-
+})
   // Load posts from database
   try {
     const { data, error } = await supabase
@@ -96,18 +106,19 @@ window.addEventListener('DOMContentLoaded', async () => {
               <button  onclick = "deletePost(event,${post.id})" class="btn btn-danger" type="button">Delete</button>
             </div>
           </div>
-        </div>
-      </div>`;
-      document.getElementById("title").value = "";
-      document.getElementById("description").value = "";
+        </div>`;
+        document.getElementById("title").value = "";
+        document.getElementById("description").value = "";
+  
+      })
+      if (error) console.log(error);
+    }
+    catch (error) {
+      console.log(error);
+    }
 
-    })
-    if (error) console.log(error);
-  }
-  catch (error) {
-    console.log(error);
-  }
-})
+
+
 async function deletePost(event, id) {
   try {
 
@@ -240,7 +251,9 @@ async function post() {
   }
 }
 
-
+function logOut(){
+  location.href = "index.html";
+}
 
 
 function clickAbleImg(src) {
@@ -259,3 +272,4 @@ window.clickAbleImg = clickAbleImg;
 window.deletePost = deletePost;
 window.editPost = editPost;
 window.searchPosts = searchPosts;
+window.logOut = logOut;
