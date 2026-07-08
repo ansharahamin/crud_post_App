@@ -1,122 +1,478 @@
+/* ===================================================================
+   Post App — "Field Journal" theme
+   Palette:  --moss-black #0E1512  --forest #17231C  --forest-light #1F2E24
+             --parchment #F3ECDA   --sage #8FB58A     --gold #D6A756
+             --rust #C1573A (danger)
+   Type:     Fraunces (display) / Work Sans (body) / JetBrains Mono (meta)
+=================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root{
+  --moss-black: #0E1512;
+  --forest: #17231C;
+  --forest-light: #1F2E24;
+  --parchment: #F3ECDA;
+  --parchment-dim: #E4DCC5;
+  --sage: #8FB58A;
+  --sage-strong: #6C9868;
+  --gold: #D6A756;
+  --rust: #C1573A;
+  --ink: #EDEAE0;
+  --ink-soft: #B9C4B7;
+  --shadow: rgba(0,0,0,0.35);
+  --nav-height: 72px;
+}
+
 *{
-    margin: 0px;
-    padding: 0px;
-    box-sizing: border-box;
-    
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
+
+html{
+  scroll-behavior: smooth;
+}
+
 body{
-    margin: 0%;
-    padding: 0%;
-    background-image: url("https://img.freepik.com/free-vector/leaves-background-with-metallic-foil_79603-956.jpg?semt=ais_hybrid&w=740&q=80");
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  font-family: 'Work Sans', 'Segoe UI', sans-serif;
+  color: var(--ink);
+  background-color: var(--moss-black);
+  background-image:
+    linear-gradient(180deg, rgba(14,21,18,0.94) 0%, rgba(14,21,18,0.90) 40%, rgba(14,21,18,0.97) 100%),
+    url("https://img.freepik.com/free-vector/leaves-background-with-metallic-foil_79603-956.jpg?semt=ais_hybrid&w=740&q=80");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
+
+h1,h2,h3,h4,h5,.navbar-brand,.card-title{
+  font-family: 'Fraunces', Georgia, serif;
+  letter-spacing: 0.01em;
+}
+
+small, .card-text small, time{
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.02em;
+}
+
+/* ---------------------------------------------------------------
+   Navbar — sticky, full-bleed, glass over forest green
+--------------------------------------------------------------- */
 .myNav{
- background-color: rgba(96, 141, 118, 0.904);   
- color: aliceblue;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  width: 100%;
+  background: rgba(23, 35, 28, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(214, 167, 86, 0.25);
+  color: var(--ink);
+  padding: 0.6rem 0;
 }
+
+.myNav .container-fluid{
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.myNav .logo{
+  border-radius: 8px;
+}
+
+.navbar-brand{
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--parchment) !important;
+  margin-right: auto;
+}
+
+.myNav [role="search"]{
+  flex: 1 1 320px;
+  max-width: 420px;
+}
+
+.myNav input#searchValue{
+  background: rgba(243, 236, 218, 0.08);
+  border: 1px solid rgba(214, 167, 86, 0.35);
+  color: var(--ink);
+  border-radius: 999px 0 0 999px;
+  padding: 0.5rem 1rem;
+}
+
+.myNav input#searchValue::placeholder{
+  color: var(--ink-soft);
+}
+
+.myNav input#searchValue:focus{
+  outline: none;
+  box-shadow: none;
+  border-color: var(--gold);
+  background: rgba(243, 236, 218, 0.14);
+}
+
+.myNav button.btn-secondary{
+  border-radius: 0 999px 999px 0 !important;
+  border: 1px solid var(--gold);
+  background: var(--gold);
+  color: var(--moss-black);
+  font-weight: 600;
+  padding: 0.5rem 1.1rem;
+}
+
+.myNav button.btn-secondary:hover{
+  background: #e5bd76;
+  border-color: #e5bd76;
+}
+
+#userInfo{
+  height: 42px;
+  width: 42px;
+  min-width: 42px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--moss-black);
+  background: var(--sage);
+  border: 2px solid var(--gold);
+  font-weight: 700;
+  font-family: 'Fraunces', serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease;
+}
+
+#userInfo:hover{
+  transform: scale(1.08);
+}
+
+/* ---------------------------------------------------------------
+   Buttons (global)
+--------------------------------------------------------------- */
 .MyBtn{
-    background-color:rgba(74, 121, 107, 0.842);
-    color: aliceblue;
-    font-weight: bold;
-    border: none;
+  background: var(--sage-strong);
+  color: var(--parchment);
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  padding: 0.55rem 1.4rem;
+  letter-spacing: 0.02em;
 }
-.boxShadow:focus{
-box-shadow: none;
-border: 2px groove rgba(74, 121, 107, 0.842);
-}
+
 .MyBtn:hover{
-    background-color:rgba(74, 121, 107, 0.842);
-    color: aliceblue;
-    font-weight: bold;
-    transform: scale(1.15);
-    transition: 1s;
-        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-
+  background: var(--gold);
+  color: var(--moss-black);
+  font-weight: bold;
+  transform: scale(1.06);
+  transition: 0.25s ease;
+  box-shadow: 0 6px 16px var(--shadow);
 }
+
+.boxShadow:focus{
+  box-shadow: none;
+  border: 2px solid var(--sage-strong);
+  outline: none;
+}
+
+.removeBorderOnFocus:focus{
+  border: 2px solid var(--sage-strong);
+  box-shadow: 0 3px 10px rgba(111, 152, 104, 0.25);
+  outline: none;
+}
+
+/* ---------------------------------------------------------------
+   Main app layout
+--------------------------------------------------------------- */
+#postBox{
+  display: flex !important;
+  align-items: flex-start;
+  gap: 2rem;
+  padding: 2rem clamp(1rem, 4vw, 3rem);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ---------------------------------------------------------------
+   Compose card — parchment "journal page"
+--------------------------------------------------------------- */
 .card{
-    margin-left: 15px;
-    margin-top: 15px;
-    border-radius: 15px;
-    border: 2px groove gray;
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-    max-width: 600px;
+  border-radius: 16px;
+  border: 1px solid rgba(214, 167, 86, 0.3);
+  box-shadow: 0 10px 30px var(--shadow);
 }
-.circle{
-    height: 40px;
-    width: 40px;
-    border-radius: 50%;
-    background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgE4FPoOW8nltH4eN6RwIcK--ckBBS-lDkyw&s");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-}
-.postCard{
-    height: 270px;
-    width: 700px;
-    object-fit: cover;
-}
-.selectedImg{
-    border-radius: 30%;
-    cursor: pointer;
-      border: 2px solid black;
-          background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    color: white;
 
-}
-.imgBorder:hover{
-    border: 2px solid black;
-    transform: scale(1.5px);
-    transition: 1s;
-}
-.postCard{
-    
-          background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    color: white;
-}
-.formContainer{
-max-width: 500px;
-}
-/* .postInput{
-    width: 500px;
-} */
- .removeBorderOnFocus:focus{
-    border: 2px groove rgb(80, 112, 73);
-        box-shadow: rgba(83, 122, 98, 0.24) 0px 3px 8px;
-outline: none;
- }
 .postInput{
-    height: fit-content;
-    width: 500px;
-    background-image: url("https://img.freepik.com/free-photo/sunset-background-pastel-sky_53876-129041.jpg?semt=ais_hybrid&w=740&q=80");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    margin: 0 auto;
-    max-width: 500px;
- }
+  flex: 0 0 340px;
+  position: sticky;
+  top: calc(var(--nav-height) + 1.25rem);
+  width: 340px;
+  max-width: 100%;
+  height: fit-content;
+  background: var(--parchment);
+  background-image: none;
+  color: var(--moss-black);
+  border: 1px dashed rgba(111, 152, 104, 0.55);
+  margin: 0;
+}
+
+.postInput .form-label{
+  color: var(--forest);
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+}
+
+.postInput .form-control{
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(23,35,28,0.2);
+  color: var(--moss-black);
+}
+
+.postInput .form-control::placeholder{
+  color: rgba(23,35,28,0.45);
+}
+
+.img.d-flex img.bgImg{
+  border-radius: 10px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  object-fit: cover;
+  height: 46px;
+  width: 46px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.imgBorder:hover,
+.img.d-flex img.bgImg:hover{
+  border-color: var(--sage-strong);
+  transform: scale(1.1);
+  transition: 0.2s ease;
+}
+
+.selectedImg{
+  border-radius: 10px;
+  cursor: pointer;
+  border: 3px solid var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(214,167,86,0.25);
+}
+
 .postBtn{
-    float: right;
-    background-color: darkolivegreen;
- }
-   @media (max-width: 900px) {
-.postCard{
-max-width: 350px ;
-max-height: 870px;
+  float: right;
+  background: var(--gold);
+  color: var(--moss-black);
+  font-weight: 700;
 }
-.postInput{
-    height: fit-content;
-    width: 300px;
-    background-image: url("https://img.freepik.com/free-photo/sunset-background-pastel-sky_53876-129041.jpg?semt=ais_hybrid&w=740&q=80");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    margin: 0 auto;
-    max-width: 500px;
- }
+
+.postBtn:hover{
+  background: var(--sage-strong);
+  color: var(--parchment);
+}
+
+/* ---------------------------------------------------------------
+   Feed — responsive grid of journal-entry cards
+--------------------------------------------------------------- */
+#posts{
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  align-content: start;
+  width: 100%;
+}
+
+/* the JS injects .col-lg-8.col-md-12.col-sm-12 wrappers around each post;
+   override Bootstrap's grid width so our CSS grid controls sizing */
+#posts .col-lg-8,
+#posts .col-md-12,
+#posts .col-sm-12{
+  width: 100%;
+  max-width: 100%;
+  flex: none;
+  padding: 0;
+}
+
+.postCard{
+  position: relative;
+  height: 300px;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(214, 167, 86, 0.25);
+  box-shadow: 0 10px 24px var(--shadow);
+  background-color: var(--forest-light);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.postCard:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px var(--shadow);
+}
+
+/* dark scrim so light text always stays readable over any bg image */
+.postCard .card-img-overlay{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(14,21,18,0.15) 0%,
+    rgba(14,21,18,0.55) 55%,
+    rgba(14,21,18,0.92) 100%
+  );
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+}
+
+.postCard .card-title,
+.postCard .card-text{
+  color: var(--parchment) !important;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.postCard h3.card-title{
+  font-size: 1.05rem;
+  margin: 0 0 0.15rem 0 !important;
+  color: var(--gold) !important;
+}
+
+.postCard p.card-title.text-secondary{
+  color: var(--ink-soft) !important;
+  font-size: 0.75rem;
+}
+
+.postCard p.card-title{
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.postCard p.card-text{
+  font-size: 0.85rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.postCard > div.bg-white{
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  left: auto;
+  width: auto;
+  background: rgba(243,236,218,0.9) !important;
+  color: var(--moss-black);
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.btn-div{
+  margin-top: 0.6rem;
+  gap: 0.5rem;
+}
+
+.postCard .btn{
+  border: none;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.9rem;
+  font-weight: 600;
+}
+
+.postCard .btn-success{
+  background: var(--sage-strong);
+  color: var(--parchment);
+}
+
+.postCard .btn-success:hover{
+  background: var(--sage);
+}
+
+.postCard .btn-danger{
+  background: var(--rust);
+  color: var(--parchment);
+}
+
+.postCard .btn-danger:hover{
+  background: #d76a4c;
+}
+
+/* misc shared classes kept for other pages in the app */
+.circle{
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgE4FPoOW8nltH4eN6RwIcK--ckBBS-lDkyw&s");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border: 2px solid var(--gold);
+}
+
+.formContainer{
+  max-width: 500px;
+}
+
+/* ---------------------------------------------------------------
+   Responsive
+--------------------------------------------------------------- */
+@media (max-width: 992px){
+  #postBox{
+    flex-direction: column;
+    padding: 1.5rem 1rem;
   }
+  .postInput{
+    position: static;
+    width: 100%;
+    flex: 1 1 auto;
+  }
+  #posts{
+    width: 100%;
+  }
+}
+
+@media (max-width: 650px){
+  .myNav .container-fluid{
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+  .navbar-brand{
+    display: inline-block !important;
+    order: 1;
+    font-size: 1.1rem;
+  }
+  .myNav .logo{
+    order: 0;
+  }
+  #userInfo{
+    order: 2;
+    margin-left: auto;
+  }
+  .myNav [role="search"]{
+    order: 3;
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  #posts{
+    grid-template-columns: 1fr;
+  }
+  .postCard{
+    height: 260px;
+  }
+}
+
+@media (max-width: 400px){
+  .postInput .img.d-flex{
+    flex-wrap: wrap;
+  }
+}

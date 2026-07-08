@@ -11,55 +11,55 @@
 </head>
 
 <body>
-  <div class="container-fluid bodybg row">
-    <nav class="navbar myNav mb-3">
+  <div class="container-fluid bodybg">
+
+    <nav class="myNav mb-3">
       <div class="container-fluid">
-        <img class="mb-4" src="./images/s-latter-logo_795228-18-removebg-preview.png" alt="" width="85" height="62">
-        <a class="navbar-brand text-white fw-bold">Post App</a>
-        <div class="d-flex ms-auto" role="search">
-          <input id="searchValue" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-          <button onclick="searchPosts()" class="btn btn-secondary">
-            Search
-          </button>
+        <img class="logo" src="./images/s-latter-logo_795228-18-removebg-preview.png" alt="" width="42" height="42">
+        <a class="navbar-brand">Post App</a>
+        <div role="search" class="d-flex">
+          <input id="searchValue" class="form-control" type="search" placeholder="Search posts, people…" aria-label="Search" />
+          <button onclick="searchPosts()" class="btn btn-secondary">Search</button>
         </div>
-        <button class="btn btn-danger ms-2" id="btn-logout" onclick="logOut()">Logout</button>
+        <button class="btn" id="userInfo" onclick="userInfo()"></button>
       </div>
     </nav>
 
     <!-- postBox is hidden by default; app.js shows it after verifying session -->
-    <div class="d-flex justify-content-around d-none flex-wrap" id="postBox">
+    <div class="d-none" id="postBox">
       <!-- Hidden input to carry the logged-in user's name for post() function -->
       <input type="hidden" id="userName" value="">
 
       <div class="card postInput">
-        <div class="m-2">
+        <div class="m-3">
           <div class="mb-3">
             <label for="title" class="form-label fw-bold">Title</label>
-            <input type="text" class="form-control boxShadow" id="title" aria-describedby="emailHelp">
+            <input type="text" class="form-control boxShadow" id="title" aria-describedby="emailHelp"
+              placeholder="What's this entry about?">
           </div>
           <div class="mb-3">
             <label for="description" class="form-label fw-bold">Description</label>
-            <textarea class="form-control boxShadow" id="description" rows="3"></textarea>
+            <textarea class="form-control boxShadow" id="description" rows="3"
+              placeholder="Write your entry…"></textarea>
           </div>
-          <div class="img d-flex justify-content-around gap-2">
-            <img height="50" width="50" class="bgImg" onclick="clickAbleImg()"
-              src="https://wallpapers.com/images/hd/explosion-glitter-background-flash-8qvrw7mcdhlbep78.jpg" alt=""
-              srcset="">
-            <img height="50" width="50" class="bgImg" onclick="clickAbleImg()"
-              src="./images/3.jpg" alt="" srcset="">
-            <img height="50" width="50" class="bgImg" onclick="clickAbleImg()"
-              src="./images/2.jpg"
-              alt="" srcset="">
-            <img height="50" width="50" class="bgImg" onclick="clickAbleImg()"
-              src="./images/4.jpg" alt="" srcset="">
-            <img height="50" width="50" class="bgImg" onclick="clickAbleImg()"
-              src="https://i.pinimg.com/736x/09/d5/fa/09d5fad0af9aa27e5da9883fbc1d4f4d.jpg" alt="" srcset="">
+          <div class="mb-2">
+            <label class="form-label fw-bold">Background</label>
+            <div class="img d-flex justify-content-around gap-2 flex-wrap">
+              <img class="bgImg imgBorder" onclick="clickAbleImg()"
+                src="https://wallpapers.com/images/hd/explosion-glitter-background-flash-8qvrw7mcdhlbep78.jpg" alt="">
+              <img class="bgImg imgBorder" onclick="clickAbleImg()" src="./images/3.jpg" alt="">
+              <img class="bgImg imgBorder" onclick="clickAbleImg()" src="./images/2.jpg" alt="">
+              <img class="bgImg imgBorder" onclick="clickAbleImg()" src="./images/4.jpg" alt="">
+              <img class="bgImg imgBorder" onclick="clickAbleImg()"
+                src="https://i.pinimg.com/736x/09/d5/fa/09d5fad0af9aa27e5da9883fbc1d4f4d.jpg" alt="">
+            </div>
           </div>
 
-          <button type="button" onclick="post()" class="btn MyBtn ms-auto ms-5 mt-3 postBtn">Post</button>
+          <button type="button" onclick="post()" class="btn MyBtn postBtn">Post</button>
         </div>
       </div>
-      <div class="" id="posts"></div>
+
+      <div id="posts"></div>
     </div>
   </div>
 

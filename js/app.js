@@ -2,10 +2,16 @@ import supabase from "./supabase.js";
 
 var cardImg;
 var editID;
-
+var currentUserEmail = null;
+var currentUserName = null;
+var currentUserId = null;
 var postTime = new Date()
 var timeOnly = postTime.toLocaleTimeString()
 // const logout = document.getElementById("btn-logout")
+
+function userInfo() {
+  const user = supabase.auth.getUser()
+}
 async function logout() {
   const { error } = await supabase.auth.signOut()
   if (error) {
@@ -19,48 +25,60 @@ async function logout() {
 async function searchPosts() {
 
   let searchValue = document.getElementById("searchValue").value.trim();
-  
-   var posts = document.getElementById("posts");
-   posts.innerHTML = "";
-   try {
+
+  var posts = document.getElementById("posts");
+  posts.innerHTML = "";
+  try {
     const { data, error } = await supabase
-  .from('Post App Table') 
-  .select('*')
-  // .ilike('title', `%${searchValue}%`)
-    .or(`title.ilike.%${searchValue}%, description.ilike.%${searchValue}%, userName.ilike.%${searchValue}%`)
-  if (error)   console.log(error);
-  console.log(data);
-var posts = document.getElementById("posts");
-posts.innerHTML = "";
-   data.forEach(post => {
-      posts.innerHTML += `   <div   class="col-lg-8 col-md-12 col-sm-12">
-        <div style="background: url('${post.img_bg}');" class="card text-bg-light postCard">
-        
-          <div class="card-img-overlay">
-                      <h3 class="card-title text-white my-4">${post.userName}</h3>
-            <h5 class="card-title text-white">${post.title}</h5>
-            <p class="card-text text-white">${post.description}</p>
-            <p class="card-text text-white"><small>${post.created_at}</small></p>
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-              <button onclick = " editPost(event,${post.id})" class="btn btn-success me-md-2" type="button">Edit</button>
-              <button  onclick = "deletePost(event,${post.id})" class="btn btn-danger" type="button">Delete</button>
-            </div>
-          </div>
-        </div>
-      </div>`;
-   })
+      .from('Post App Table')
+      .select('*')
+      // .ilike('title', `%${searchValue}%`)
+      .or(`title.ilike.%${searchValue}%, description.ilike.%${searchValue}%, userName.ilike.%${searchValue}%, email.ilike.%${searchValue}%`)
+    if (data.length === 0) {
+      console.log("No posts found.");
+      Swal.fire({
+        icon: "info",
+        title: "No results",
+        text: "No posts found matching your search.",
+      });
+    }
+    if (error) console.log(error);
+
+    console.log(data);
+  const { data: likes } = await supabase.from('Likes').select('*')
+    const { data: comments } = await supabase.from('Comments').select('*').order('created_at', { ascending: false })
+
+    renderPosts(posts, likes || [], comments || [])
   }
-   catch (error) {
+  catch (error) {
     console.log(error);
-    
-   }
 
   }
+
+}
 
 
 window.addEventListener('DOMContentLoaded', async () => {
   console.log("DOM Loaded");
-
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    currentUserId = user.id;
+    currentUserEmail = user.email;
+    currentUserName = user.user_metadata?.first_name || user.email.split('@')[0];
+    var firstLetter = currentUserName.charAt(0).toUpperCase();
+    document.getElementById("userInfo").textContent = firstLetter;
+    console.log("Current User:", user);
+    if (!user) {
+      Swal.fire({
+        icon: "error",
+        title: "Not Logged In",
+        text: "Please log in to post.",
+      });
+      return;
+    }
+  } catch (error) {
+    console.log(error);
+  }
   // Check if user is logged in via Supabase
   const { data: { session } } = await supabase.auth.getSession();
 
@@ -70,20 +88,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // User is authenticated — show the post box
   var postBox = document.getElementById("postBox");
   if (postBox) postBox.classList.remove("d-none");
 
-  // Auto-fill userName from the logged-in user's Supabase metadata
-  var userNameInput = document.getElementById("userName");
-  if (userNameInput && session.user.user_metadata?.userName) {
-    userNameInput.value = session.user.user_metadata.userName;
-  } else if (userNameInput) {
-    // Fallback: use email prefix if no username metadata
-    userNameInput.value = session.user.email.split("@")[0];
-  }
-})
-  // Load posts from database
+
+
+  var posts = []
   try {
     const { data, error } = await supabase
       .from('Post App Table')
@@ -91,31 +101,79 @@ window.addEventListener('DOMContentLoaded', async () => {
       .order('id', { ascending: false });
 
     console.log(data);
- var posts = document.getElementById("posts");   
-    data.forEach(post => {
-      posts.innerHTML += `   <div   class="col-lg-8 col-md-12 col-sm-12">
-        <div style="background: url('${post.img_bg}');" class="card text-bg-light postCard">
-        
-          <div class="card-img-overlay">
-                      <h3 class="card-title text-white my-4">${post.userName}</h3>
-            <h5 class="card-title text-white">${post.title}</h5>
-            <p class="card-text text-white">${post.description}</p>
-            <p class="card-text text-white"><small>${post.created_at}</small></p>
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-              <button onclick = " editPost(event,${post.id})" class="btn btn-success me-md-2" type="button">Edit</button>
-              <button  onclick = "deletePost(event,${post.id})" class="btn btn-danger" type="button">Delete</button>
-            </div>
-          </div>
-        </div>`;
-        document.getElementById("title").value = "";
-        document.getElementById("description").value = "";
-  
-      })
-      if (error) console.log(error);
-    }
-    catch (error) {
-      console.log(error);
-    }
+    posts = data;
+
+    if (error) console.log(error);
+  }
+  catch (error) {
+    console.log(error);
+  }
+  const { data: { likes } } = await supabase.from('Likes').select('*').order('created_at', { ascending: false });;
+  const { data: { comments } } = await supabase.from('Comments').select('*').order('created_at', { ascending: false });
+  renderPosts(posts, likes || [], comments || []);
+})
+
+
+// Function to render posts with likes and comments
+async function renderPosts(posts, likes, comments) {
+  var postsContainer = document.getElementById("posts");
+  postsContainer.innerHTML = ""; // Clear existing posts
+  posts.forEach(post => {
+    var isOwner = post.user_id === currentUserId;
+    var postLikes = likes.filter(like => like.post_id === post.id);
+    var likesCount = postLikes.length;
+    var isLiked = postLikes.some(like => like.user_id === currentUserId);
+    var postComments = comments.filter(comment => comment.post_id === post.id);
+    var commentsCount = postComments.length;
+    var commentsHtml = postComments.map(c => `
+      <div class="comment-item d-flex justify-content-between">
+        <small><b>${c.email}:</b> ${c.comment_text}</small>
+        ${c.user_id === currentUserId ? `<span onclick="deleteComment(event, ${c.id})" style="cursor:pointer" class="text-danger">✖</span>` : ''}
+      </div>
+    `).join('')
+
+
+    postsDiv.innerHTML += `
+    <div class="card mb-2" id="post-${post.id}">
+      <div class="card-header">${post.id} : ${post.userName} </div>
+      <div class="card-header f-2 text-secondary"> ${post.email} </div>
+      <div style="background-image:url(${post.img_bg})" class="card-body">
+        <figure>
+          <blockquote class="blockquote">
+            <p>${post.title}</p>
+          </blockquote>
+          <figcaption class="blockquote-footer">${post.description}</figcaption>
+        </figure>
+      </div>
+
+      <div class="d-flex align-items-center gap-3 px-2">
+        <span onclick="toggleLike(event, ${post.id})" style="cursor:pointer">
+          ${isLiked ? '❤️' : '🤍'} <span id="like-count-${post.id}">${likeCount}</span>
+        </span>
+        <span onclick="toggleCommentsBox(${post.id})" style="cursor:pointer">
+          💬 <span id="comment-count-${post.id}">${commentCount}</span>
+        </span>
+      </div>  
+      <div id="comments-box-${post.id}" style="display:none" class="p-2">
+        <div id="comments-list-${post.id}">
+          ${commentsHtml}
+        </div>
+        <div class="d-flex gap-1 mt-1">
+          <input type="text" id="comment-input-${post.id}" class="form-control form-control-sm" placeholder="Add a comment...">
+          <button onclick="addComment(event, ${post.id})" class="btn btn-sm btn-primary">Send</button>
+        </div>
+      </div>
+
+      <div class="ms-auto m-2">
+        ${isOwner ? `
+          <button onclick="editPost(event,${post.id})" class="btn btn-success">Edit</button>
+          <button onclick="deletePost(event,${post.id})" class="btn btn-danger">Delete</button>
+        ` : ''}
+      </div>
+    </div>`
+  })
+}
+
 
 
 
@@ -176,7 +234,7 @@ function editPost(event, id) {
   // Use querySelector to reliably find title (h5) and description (p)
   var overlay = cardCol.querySelector(".card-img-overlay");
   var titleText = overlay.querySelector("h5").innerText;
-  var descText = overlay.querySelector("p").innerText;
+  var descText = overlay.querySelector("h6").innerText;
 
   document.getElementById("title").value = titleText;
   document.getElementById("description").value = descText;
@@ -199,14 +257,30 @@ async function post() {
     });
     return;
   }
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
 
+
+    currentUser = user.email;
+    currentUserId = user.id;
+    if (!user) {
+      Swal.fire({
+        icon: "error",
+        title: "Not Logged In",
+        text: "Please log in to post.",
+      });
+      return;
+    }
+  } catch (error) {
+    console.log(error);
+  }
   try {
     let inserted;
 
     if (editID) {
       const { data, error } = await supabase
         .from("Post App Table")
-        .update({ userName: userName, title, description, img_bg: cardImg })
+        .update({ userName: currentUserName, title, description, img_bg: cardImg, created_at: new Date().toISOString(), email: currentUserEmail })
         .eq('id', editID)
         .select("*");
       if (error) throw error;
@@ -215,31 +289,18 @@ async function post() {
     } else {
       const { data, error } = await supabase
         .from("Post App Table")
-        .insert([{ userName: userName, title, description, img_bg: cardImg }])
+        .insert([{ userName: currentUserName, title, description, img_bg: cardImg, email: currentUserEmail, created_at: new Date().toISOString() }])
         .select("*");
       if (error) throw error;
       console.log(data[0]);
       inserted = data[0];
     }
 
-    // Only render card after DB operation succeeds and inserted is defined
+
     document.getElementById("title").value = "";
     document.getElementById("description").value = "";
     location.reload();
-    // posts.innerHTML += `<div class="col-lg-8 col-md-12 col-sm-12">
-    //     <div style="background: url('${inserted.img_bg}');" class="card text-bg-light postCard">
-    //       <div class="card-img-overlay">
-    //         <h3 class="card-title text-white my-4">${inserted.userName}</h3>
-    //         <h5 class="card-title text-white">${inserted.title}</h5>
-    //         <p class="card-text text-white">${inserted.description}</p>
-    //         <p class="card-text text-white"><small>${inserted.created_at}</small></p>
-    //         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-    //           <button onclick="editPost(event, ${inserted.id})" class="btn btn-success me-md-2" type="button">Edit</button>
-    //           <button onclick="deletePost(event, ${inserted.id})" class="btn btn-danger" type="button">Delete</button>
-    //         </div>
-    //       </div>
-    //     </div>
-    //   </div>`;
+
 
   } catch (error) {
     console.log(error);
@@ -251,7 +312,7 @@ async function post() {
   }
 }
 
-function logOut(){
+function logOut() {
   location.href = "index.html";
 }
 
@@ -272,4 +333,4 @@ window.clickAbleImg = clickAbleImg;
 window.deletePost = deletePost;
 window.editPost = editPost;
 window.searchPosts = searchPosts;
-window.logOut = logOut;
+window.logOut = logOut

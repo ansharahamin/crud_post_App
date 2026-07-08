@@ -40,8 +40,16 @@ register_btn.addEventListener('click', async (e) => {
     try {
         const { data, error } = await supabase.auth.signUp({
             email: email,
-            password: password
+            password: password,
+                options: {
+      data: {
+        first_name: userName,
+        password: password
+      }
+    }
         })
+            console.log("User signed up:", data)
+
         if (error) {
             console.log(error);
             alert("Error signing up. Please try again.");
