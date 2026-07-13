@@ -9,8 +9,40 @@ var postTime = new Date()
 var timeOnly = postTime.toLocaleTimeString()
 // const logout = document.getElementById("btn-logout")
 
-function userInfo() {
-  const user = supabase.auth.getUser()
+async function userInfo() {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error || !user) {
+      Swal.fire({
+        icon: "info",
+        title: "Not logged in",
+        text: "Please login to view your info.",
+      });
+      return
+    }
+
+    Swal.fire({
+      title: `${user.user_metadata.first_name}'s Info`,
+      html: `
+        <div style="text-align:left">
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>User ID:</strong> ${user.id}</p>
+          <p><strong>First Name:</strong> ${user.user_metadata.first_name}</p>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Logout",
+      cancelButtonText: "Close",
+      confirmButtonColor: "#dc3545",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        logout();
+      }
+    });
+
+  } catch (error) {
+    console.log(error);
+  }
 }
 async function logout() {
   const { error } = await supabase.auth.signOut()
@@ -26,8 +58,8 @@ async function searchPosts() {
 
   let searchValue = document.getElementById("searchValue").value.trim();
 
-  var posts = document.getElementById("posts");
-  posts.innerHTML = "";
+  var postsContainer = document.getElementById("posts");
+  postsContainer.innerHTML = "";
   try {
     const { data, error } = await supabase
       .from('Post App Table')
@@ -48,7 +80,7 @@ async function searchPosts() {
   const { data: likes } = await supabase.from('Likes').select('*')
     const { data: comments } = await supabase.from('Comments').select('*').order('created_at', { ascending: false })
 
-    renderPosts(posts, likes || [], comments || [])
+    renderPosts(data, likes || [], comments || [])
   }
   catch (error) {
     console.log(error);
@@ -133,7 +165,7 @@ async function renderPosts(posts, likes, comments) {
     `).join('')
 
 
-    postsDiv.innerHTML += `
+    postsContainer.innerHTML += `
     <div class="card mb-2" id="post-${post.id}">
       <div class="card-header">${post.id} : ${post.userName} </div>
       <div class="card-header f-2 text-secondary"> ${post.email} </div>
@@ -148,10 +180,10 @@ async function renderPosts(posts, likes, comments) {
 
       <div class="d-flex align-items-center gap-3 px-2">
         <span onclick="toggleLike(event, ${post.id})" style="cursor:pointer">
-          ${isLiked ? '❤️' : '🤍'} <span id="like-count-${post.id}">${likeCount}</span>
+          ${isLiked ? '❤️' : '🤍'} <span id="like-count-${post.id}">${likesCount}</span>
         </span>
         <span onclick="toggleCommentsBox(${post.id})" style="cursor:pointer">
-          💬 <span id="comment-count-${post.id}">${commentCount}</span>
+          💬 <span id="comment-count-${post.id}">${commentsCount}</span>
         </span>
       </div>  
       <div id="comments-box-${post.id}" style="display:none" class="p-2">
@@ -248,7 +280,9 @@ async function post() {
   var description = document.getElementById("description").value;
   var posts = document.getElementById("posts");
   console.log(title, description);
-
+ let imageFile = document.getElementById('img_upload').files[0]
+ console.log(imageFile);
+ 
   if (!title.trim() || !description.trim()) {
     Swal.fire({
       icon: "error",
@@ -261,7 +295,7 @@ async function post() {
     const { data: { user } } = await supabase.auth.getUser()
 
 
-    currentUser = user.email;
+    currentUserEmail = user.email;
     currentUserId = user.id;
     if (!user) {
       Swal.fire({
@@ -274,13 +308,42 @@ async function post() {
   } catch (error) {
     console.log(error);
   }
+  let img_url = null;
+  if (imageFile) {
+    var imageName = `${Date.now()}_${imageFile.name}`
+    const {error : uploadError} = await supabase
+    .storage
+    .from('post')
+    .upload(imageName , imageFile , {
+      cacheControl : '3600',
+      upsert : false
+    })
+    if(uploadError){
+      console.log(uploadError);
+      alert('img upload failed')
+      return
+    }
+
+    const{data : img_data } = supabase
+    .storage
+    .from('post')
+    .getPublicUrl(imageName)
+    img_url = img_data.publicUrl 
+    console.log(img_url);
+    
+
+  }else if(cardImg){
+    img_url = cardImg
+  }else{
+    alert('Please select an image')
+  }
   try {
     let inserted;
 
     if (editID) {
       const { data, error } = await supabase
         .from("Post App Table")
-        .update({ userName: currentUserName, title, description, img_bg: cardImg, created_at: new Date().toISOString(), email: currentUserEmail })
+        .update({ userName: currentUserName, title, description, img_bg: img_url, created_at: new Date().toISOString(), email: currentUserEmail })
         .eq('id', editID)
         .select("*");
       if (error) throw error;
@@ -289,7 +352,7 @@ async function post() {
     } else {
       const { data, error } = await supabase
         .from("Post App Table")
-        .insert([{ userName: currentUserName, title, description, img_bg: cardImg, email: currentUserEmail, created_at: new Date().toISOString() }])
+        .insert([{ userName: currentUserName, title, description, img_bg: img_url, email: currentUserEmail, created_at: new Date().toISOString() }])
         .select("*");
       if (error) throw error;
       console.log(data[0]);
@@ -315,6 +378,98 @@ async function post() {
 function logOut() {
   location.href = "index.html";
 }
+ function toggleCommentsBox(postID) {
+  const commentsBox = document.getElementById(`comments-box-${postID}`);
+  commentsBox.style.display = commentsBox.style.display === 'none'? 'block' : 'none';
+}
+
+async function addComment(event, postID) {
+  const commentInput = document.getElementById(`comment-input-${postID}`);
+  const commentText = commentInput.value.trim();
+  if(!currentUserId){
+    Swal.fire({
+      icon: "error",
+      title: "Not Logged In",
+      text: "Please log in to comment.",
+    });
+    return;
+  } 
+  if (!commentText) {
+    Swal.fire({
+      icon: "error",
+      title: "Empty Comment",
+      text: "Please enter a comment before sending.",
+    });
+    return;
+  }
+  try{
+
+    const {data , error} = await supabase.from('Comments').insert([{post_id:postID,user_id:currentUserId,email:currentUserEmail,userName:currentUserName,comment_text:commentText}]).select('*')
+    if(error) throw error;
+    commentInput.value = '';
+    const { data: posts } = await supabase.from('Post App Table').select('*').order('id', { ascending: false });
+    const { data: likes } = await supabase.from('Likes').select('*').order('created_at', { ascending: false });
+    const { data: comments } = await supabase.from('Comments').select('*').order('created_at', { ascending: false });
+    renderPosts(posts || [], likes || [], comments || []);
+  }catch(error){
+    console.log(error);
+  }
+}
+
+async function toggleLike(event,postID){
+  if(!currentUserId){
+    Swal.fire({
+      icon: "error",
+      title: "Not Logged In",
+      text: "Please log in to like posts.",
+    });
+    return;
+  }
+  try {
+    const {data:existingLike,error:likeError} = await supabase
+    .from('Likes')
+    .select('*')
+    .eq('post_id',postID)
+    .eq('user_id',currentUserId)
+    .maybeSingle()
+    if(likeError) throw likeError;
+    if(existingLike){
+      const {data:deletedData,error:deleteError} = await supabase
+      .from('Likes').delete().eq('post_id',postID).eq('user_id',currentUserId)
+      if(deleteError) throw deleteError;
+
+    }else{
+      const {data:insertedData , error:insertError} = await supabase
+      .from('Likes').insert([{post_id:postID,user_id:currentUserId,email:currentUserEmail,userName:currentUserName}]).select('*')
+      if(insertError) throw insertError;
+    }
+     const { data: posts } = await supabase.from('Post App Table').select('*').order('id', { ascending: false });
+    const { data: likes } = await supabase.from('Likes').select('*').order('created_at', { ascending: false });
+    const { data: comments } = await supabase.from('Comments').select('*').order('created_at', { ascending: false });
+    renderPosts(posts || [], likes || [], comments || []);
+
+  }catch (error) {
+    console.log(error);
+  }
+}
+
+
+function handleUploadPreview(event) {
+    var label = document.getElementById('uploadLabel');
+    var icon = document.getElementById('uploadIcon');
+    var file = event.target.files[0];
+
+    if (file) {
+      label.classList.add('has-file');
+      // swap to a checkmark once a file is chosen
+      icon.innerHTML = '<path d="M20 6L9 17l-5-5"></path>';
+      label.title = file.name;
+    } else {
+      label.classList.remove('has-file');
+      icon.innerHTML = '<path d="M12 3v12"></path><path d="M7 8l5-5 5 5"></path><path d="M5 21h14"></path>';
+      label.title = 'Upload your own image';
+    }
+  }
 
 
 function clickAbleImg(src) {
@@ -334,3 +489,9 @@ window.deletePost = deletePost;
 window.editPost = editPost;
 window.searchPosts = searchPosts;
 window.logOut = logOut
+window.toggleLike = toggleLike;
+window.toggleCommentsBox = toggleCommentsBox;
+window.addComment = addComment;
+window.logout = logout;
+window.userInfo = userInfo;
+window.handleUploadPreview = handleUploadPreview

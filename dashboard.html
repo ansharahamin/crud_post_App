@@ -22,6 +22,9 @@
           <button onclick="searchPosts()" class="btn btn-secondary">Search</button>
         </div>
         <button class="btn" id="userInfo" onclick="userInfo()"></button>
+        <div class="modal fade" id="userInfoBox" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+ 
+</div>
       </div>
     </nav>
 
@@ -52,6 +55,15 @@
               <img class="bgImg imgBorder" onclick="clickAbleImg()" src="./images/4.jpg" alt="">
               <img class="bgImg imgBorder" onclick="clickAbleImg()"
                 src="https://i.pinimg.com/736x/09/d5/fa/09d5fad0af9aa27e5da9883fbc1d4f4d.jpg" alt="">
+                 <label class="bgImg upload-thumb" for="img_upload" id="uploadLabel" title="Upload your own image">
+    <svg id="uploadIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v12"></path>
+      <path d="M7 8l5-5 5 5"></path>
+      <path d="M5 21h14"></path>
+    </svg>
+    <input class="d-none" type="file" id="img_upload" accept="image/*" onchange="handleUploadPreview(event)">
+  </label>
             </div>
           </div>
 

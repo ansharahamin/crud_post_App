@@ -422,7 +422,33 @@ small, .card-text small, time{
 .formContainer{
   max-width: 500px;
 }
+.card-body {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  color: #fff; /* text hamesha light rahega */
+}
 
+.card-body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  z-index: 0;
+}
+
+.card-body > * {
+  position: relative;
+  z-index: 1; /* content overlay ke upar aaye */
+}
+
+.card-body .blockquote-footer {
+  color: #ddd !important;
+}
 /* ---------------------------------------------------------------
    Responsive
 --------------------------------------------------------------- */
