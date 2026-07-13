@@ -87,6 +87,21 @@ login_btn.addEventListener('click', async (e) => {
     }
 });
 
+
+var github = document.getElementById('github')
+github.addEventListener('click' , async (e) => {
+    e.preventDefault()
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: 'http://127.0.0.1:5501/dashboard.html'
+        }
+      })
+      if (error) {
+        console.log(error.message);
+      }
+})
+
 var signInWithGoogle = document.getElementById("signInWithGoogle")
 signInWithGoogle.addEventListener('click', async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({

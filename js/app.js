@@ -123,8 +123,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   var postBox = document.getElementById("postBox");
   if (postBox) postBox.classList.remove("d-none");
 
-
-
   var posts = []
   try {
     const { data, error } = await supabase
@@ -140,8 +138,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   catch (error) {
     console.log(error);
   }
-  const { data: { likes } } = await supabase.from('Likes').select('*').order('created_at', { ascending: false });;
-  const { data: { comments } } = await supabase.from('Comments').select('*').order('created_at', { ascending: false });
+  const { data:  likes  } = await supabase.from('Likes').select('*').order('created_at', { ascending: false });;
+  const { data:  comments  } = await supabase.from('Comments').select('*').order('created_at', { ascending: false });
   renderPosts(posts, likes || [], comments || []);
 })
 
@@ -343,7 +341,7 @@ async function post() {
     if (editID) {
       const { data, error } = await supabase
         .from("Post App Table")
-        .update({ userName: currentUserName, title, description, img_bg: img_url, created_at: new Date().toISOString(), email: currentUserEmail })
+        .update({ user_id:currentUserId, userName: currentUserName, title, description, img_bg: img_url, created_at: new Date().toISOString(), email: currentUserEmail , })
         .eq('id', editID)
         .select("*");
       if (error) throw error;
@@ -352,7 +350,7 @@ async function post() {
     } else {
       const { data, error } = await supabase
         .from("Post App Table")
-        .insert([{ userName: currentUserName, title, description, img_bg: img_url, email: currentUserEmail, created_at: new Date().toISOString() }])
+        .insert([{ user_id:currentUserId, userName: currentUserName, title, description, img_bg: img_url, email: currentUserEmail, created_at: new Date().toISOString() }])
         .select("*");
       if (error) throw error;
       console.log(data[0]);
@@ -362,7 +360,10 @@ async function post() {
 
     document.getElementById("title").value = "";
     document.getElementById("description").value = "";
-    location.reload();
+    // location.reload();
+    const { data:  likes  } = await supabase.from('Likes').select('*').order('created_at', { ascending: false });;
+    const { data:  comments  } = await supabase.from('Comments').select('*').order('created_at', { ascending: false });
+renderPosts(posts,likes,comments)
 
 
   } catch (error) {
