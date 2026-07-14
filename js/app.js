@@ -235,41 +235,62 @@ async function deletePost(event, id) {
     }
 
     // Database delete
-    const { error } = await supabase
+    const { data , error } = await supabase
       .from("Post App Table")
       .delete()
+      .select()
       .eq("id", id);
-
+    console.log(data);
+    
     if (error) {
       console.log("Delete Error:", error);
       Swal.fire("Error!", "There was an error deleting your post.", "error");
       return;
     }
 
-    // UI remove only after DB success
-    event.target.closest(".col-lg-8").remove();
-
+  
+    if (!data || data.length === 0) {
+            Swal.fire({
+        icon: "error",
+        title: "Not allowed",
+        text: "You can only delete your own posts!",
+      });
+     
+    }else{
     Swal.fire("Deleted!", "Your post has been deleted.", "success");
-
+    await refreshAllData()
+    }
   } catch (error) {
     console.log(error);
   }
 }
 
 
-function editPost(event, id) {
-  // Get the top-level col div to remove it
-  var cardCol = event.target.closest(".col-lg-8");
+async function editPost(event, id) {
+  try {
+    const {data,error} = await supabase.from('Post App Table').select('*').eq('id' , id).single()
+    if (error || !data || data.length === 0) {
+            console.log(error)
+      Swal.fire({ icon: "error", title: "Oops...", text: "Could not load post for editing." });
+      return
+    }
+    document.getElementById("title").value = data.title
+  document.getElementById("description").value = data.description
+  editID = id
+  console.log(editID);
+  
+  let post_btn = document.getElementById('post_btn')
+  post_btn.innerHTML = 'Update Post'
+    let card = document.getElementById(`post-${post.id}`)
+    if(card) card.remove()
+    await refreshAllData()
+  } catch (error) {
+    console.log(error.message);
+    
+  }
+ 
 
-  // Use querySelector to reliably find title (h5) and description (p)
-  var overlay = cardCol.querySelector(".card-img-overlay");
-  var titleText = overlay.querySelector("h5").innerText;
-  var descText = overlay.querySelector("h6").innerText;
 
-  document.getElementById("title").value = titleText;
-  document.getElementById("description").value = descText;
-  cardCol.remove();
-  editID = id;
 }
 
 async function post() {
@@ -279,7 +300,7 @@ async function post() {
   var posts = document.getElementById("posts");
   console.log(title, description);
  let imageFile = document.getElementById('img_upload').files[0]
- console.log(imageFile);
+//  console.log(imageFile);
  
   if (!title.trim() || !description.trim()) {
     Swal.fire({
@@ -347,6 +368,8 @@ async function post() {
       if (error) throw error;
       inserted = data[0];
       editID = null;
+        let post_btn = document.getElementById('post_btn')
+  post_btn.innerHTML = 'Post'
     } else {
       const { data, error } = await supabase
         .from("Post App Table")
@@ -360,10 +383,7 @@ async function post() {
 
     document.getElementById("title").value = "";
     document.getElementById("description").value = "";
-    // location.reload();
-    const { data:  likes  } = await supabase.from('Likes').select('*').order('created_at', { ascending: false });;
-    const { data:  comments  } = await supabase.from('Comments').select('*').order('created_at', { ascending: false });
-renderPosts(posts,likes,comments)
+    await refreshAllData()
 
 
   } catch (error) {
@@ -408,10 +428,7 @@ async function addComment(event, postID) {
     const {data , error} = await supabase.from('Comments').insert([{post_id:postID,user_id:currentUserId,email:currentUserEmail,userName:currentUserName,comment_text:commentText}]).select('*')
     if(error) throw error;
     commentInput.value = '';
-    const { data: posts } = await supabase.from('Post App Table').select('*').order('id', { ascending: false });
-    const { data: likes } = await supabase.from('Likes').select('*').order('created_at', { ascending: false });
-    const { data: comments } = await supabase.from('Comments').select('*').order('created_at', { ascending: false });
-    renderPosts(posts || [], likes || [], comments || []);
+   await refreshAllData()
   }catch(error){
     console.log(error);
   }
@@ -444,10 +461,7 @@ async function toggleLike(event,postID){
       .from('Likes').insert([{post_id:postID,user_id:currentUserId,email:currentUserEmail,userName:currentUserName}]).select('*')
       if(insertError) throw insertError;
     }
-     const { data: posts } = await supabase.from('Post App Table').select('*').order('id', { ascending: false });
-    const { data: likes } = await supabase.from('Likes').select('*').order('created_at', { ascending: false });
-    const { data: comments } = await supabase.from('Comments').select('*').order('created_at', { ascending: false });
-    renderPosts(posts || [], likes || [], comments || []);
+await refreshAllData()
 
   }catch (error) {
     console.log(error);
@@ -472,6 +486,18 @@ function handleUploadPreview(event) {
     }
   }
 
+  async function refreshAllData() {
+    const {data : posts , error : postError} = await supabase.from('Post App Table').select('*').order('id',{ascending : false})
+    const {data : likes} = await supabase.from('Likes').select('*')
+    const {data : comments} = await supabase.from('Comments').select('*').order('created_at',{ascending : true})
+    if (postError) {
+      console.log(postError.message
+
+      );
+      
+    }
+    renderPosts(posts || [] , likes || [], comments || [])
+  }
 
 function clickAbleImg(src) {
   var bgImg = document.getElementsByClassName("bgImg");
@@ -484,6 +510,9 @@ function clickAbleImg(src) {
   event.target.classList.add("selectedImg");
   cardImg = event.target.src
 }
+
+
+
 window.post = post;
 window.clickAbleImg = clickAbleImg;
 window.deletePost = deletePost;
@@ -496,3 +525,25 @@ window.addComment = addComment;
 window.logout = logout;
 window.userInfo = userInfo;
 window.handleUploadPreview = handleUploadPreview
+
+supabase
+  .channel('Post App')
+  .on('postgres_changes', { event: '*', schema: 'public', table:'Post App Table' }, payload => {
+
+    console.log('Change received!', payload)
+    refreshAllData()
+  })
+  .on('postgres_changes', { event: '*', schema: 'public', table:'Likes' }, payload => {
+
+    console.log('Change received!', payload)
+    refreshAllData()
+  })
+  .on('postgres_changes', { event: '*', schema: 'public', table:'Comments' }, payload => {
+
+    console.log('Change received!', payload)
+    refreshAllData()
+  })
+  .subscribe((status)=>{
+    console.log("subscribed");
+    
+  })

@@ -41,14 +41,14 @@ register_btn.addEventListener('click', async (e) => {
         const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
-                options: {
-      data: {
-        first_name: userName,
-        password: password
-      }
-    }
+            options: {
+                data: {
+                    first_name: userName,
+                    password: password
+                }
+            }
         })
-            console.log("User signed up:", data)
+        console.log("User signed up:", data)
 
         if (error) {
             console.log(error);
@@ -89,17 +89,17 @@ login_btn.addEventListener('click', async (e) => {
 
 
 var github = document.getElementById('github')
-github.addEventListener('click' , async (e) => {
+github.addEventListener('click', async (e) => {
     e.preventDefault()
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: 'http://127.0.0.1:5501/dashboard.html'
+            redirectTo: 'http://127.0.0.1:5501/dashboard.html'
         }
-      })
-      if (error) {
+    })
+    if (error) {
         console.log(error.message);
-      }
+    }
 })
 
 var signInWithGoogle = document.getElementById("signInWithGoogle")
@@ -111,9 +111,9 @@ signInWithGoogle.addEventListener('click', async () => {
         }
     })
 
-  if (error) {
-    console.log("Google login error:", error.message);
-  }
+    if (error) {
+        console.log("Google login error:", error.message);
+    }
 })
 
 // ─── Auth State Listener ──────────────────────────────────────────────────────
